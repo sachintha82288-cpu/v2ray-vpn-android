@@ -21,6 +21,15 @@ object VpnController {
         }
     }
 
+    fun restart(context: Context) {
+        val intent = V2RayVpnService.restartIntent(context)
+        try {
+            ContextCompat.startForegroundService(context, intent)
+        } catch (e: Exception) {
+            LogBus.e("Could not restart the VPN service: ${e.javaClass.simpleName}")
+        }
+    }
+
     fun stop(context: Context) {
         val intent = V2RayVpnService.stopIntent(context)
         try {

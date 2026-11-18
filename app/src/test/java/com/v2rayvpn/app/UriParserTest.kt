@@ -71,6 +71,15 @@ class UriParserTest {
         assertEquals("VMess Test", profile.name)
     }
 
+    @Test(expected = ConfigParseException::class)
+    fun rejectsVmessTcpHeaderObfuscation() {
+        val json = """
+            {"v":"2","ps":"obfs","add":"a.example.com","port":"443","id":"11111111-2222-3333-4444-555555555555",
+             "aid":"0","net":"tcp","type":"http","path":"/"}
+        """.trimIndent()
+        UriParser.parse("vmess://" + B64.encode(json))
+    }
+
     @Test
     fun parsesShadowsocksSip002() {
         val credentials = java.util.Base64.getUrlEncoder().withoutPadding()

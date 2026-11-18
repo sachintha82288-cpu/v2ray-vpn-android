@@ -150,6 +150,15 @@ fun HomeScreen(
                 }
             )
 
+            if (state is ConnectionState.Connected) {
+                Spacer(Modifier.height(4.dp))
+                OutlineButton(
+                    text = "Reconnect",
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { viewModel.reconnect() }
+                )
+            }
+
             Spacer(Modifier.height(16.dp))
 
             when (val s = state) {

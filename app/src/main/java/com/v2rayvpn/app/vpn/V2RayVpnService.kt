@@ -19,6 +19,7 @@ import com.v2rayvpn.app.MainActivity
 import com.v2rayvpn.app.R
 import com.v2rayvpn.app.core.AppContainer
 import com.v2rayvpn.app.core.log.LogBus
+import com.v2rayvpn.app.core.util.Formatters
 import com.v2rayvpn.app.core.util.Redactor
 import com.v2rayvpn.app.data.parse.XrayConfigBuilder
 import com.v2rayvpn.app.domain.model.AppSettings
@@ -54,6 +55,7 @@ class V2RayVpnService : VpnService(), XrayEngine.Listener {
     companion object {
         const val ACTION_START = "com.v2rayvpn.app.action.START"
         const val ACTION_STOP = "com.v2rayvpn.app.action.STOP"
+        const val ACTION_RESTART = "com.v2rayvpn.app.action.RESTART"
         const val EXTRA_PROFILE_ID = "profile_id"
 
         private const val CHANNEL_ID = "vpn_status"
@@ -79,6 +81,9 @@ class V2RayVpnService : VpnService(), XrayEngine.Listener {
 
         fun stopIntent(context: Context): Intent =
             Intent(context, V2RayVpnService::class.java).apply { action = ACTION_STOP }
+
+        fun restartIntent(context: Context): Intent =
+            Intent(context, V2RayVpnService::class.java).apply { action = ACTION_RESTART }
     }
 
     private lateinit var engine: XrayEngine
@@ -104,6 +109,12 @@ class V2RayVpnService : VpnService(), XrayEngine.Listener {
                 stopEverything(ConnectionState.Idle, "Disconnected by user")
             }
             ACTION_START -> startVpn(intent.getStringExtra(EXTRA_PROFILE_ID))
+            ACTION_RESTART -> {
+                showNotification("Reconnecting…", "Restarting the tunnel")
+                connectJob?.cancel()
+                connectJob = null
+                startVpn(activeProfileId)
+            }
             else -> stopEverything(ConnectionState.Idle, "Service stopped")
         }
         return START_NOT_STICKY
@@ -238,6 +249,13 @@ class V2RayVpnService : VpnService(), XrayEngine.Listener {
             PerAppMode.OFF -> builder.addDisallowedApplication(packageName)
 
             PerAppMode.ALLOW -> {
+                if (selected.isEmpty()) {
+                    // An empty allow list would leave VpnService routing every app, which is the
+                    // opposite of what the mode promises. Treat it as "everything" and say so.
+                    LogBus.w("Allow-list mode selected with no apps; routing all apps instead")
+                    builder.addDisallowedApplication(packageName)
+                    return
+                }
                 // Apps outside the allow list are excluded by the OS; mixing allow and disallow is
                 // not permitted by VpnService, so the app itself is simply not listed.
                 selected.forEach { pkg ->
@@ -278,6 +296,7 @@ class V2RayVpnService : VpnService(), XrayEngine.Listener {
         trafficJob = scope.launch {
             var totalUp = 0L
             var totalDown = 0L
+            var tick = 0
             while (isActive) {
                 delay(1000)
                 if (!engine.isRunning) continue
@@ -293,6 +312,14 @@ class V2RayVpnService : VpnService(), XrayEngine.Listener {
                         timestamp = System.currentTimeMillis()
                     )
                 )
+                // Refresh the ongoing notification every five seconds with real counters.
+                if (++tick % 5 == 0) {
+                    showNotification(
+                        "Connected · $activeProfileName",
+                        "↓ ${Formatters.rate(down)}   ↑ ${Formatters.rate(up)}   ·   " +
+                            "${Formatters.bytes(totalDown + totalUp)} this session"
+                    )
+                }
             }
         }
     }
@@ -357,6 +384,9 @@ class V2RayVpnService : VpnService(), XrayEngine.Listener {
         connectJob?.cancel()
         connectJob = null
         teardownTunnel()
+        // Session counters and the active profile belong to the tunnel that just ended.
+        VpnStateHolder.resetTraffic()
+        VpnStateHolder.setProfileId(null)
         VpnStateHolder.setPublicIp(null)
         VpnStateHolder.setState(state)
         LogBus.i("VPN stopped: $reason")

@@ -25,6 +25,8 @@ the documents required to audit the build.
 ## Features
 
 **Connection**
+- Quick Settings tile to toggle the tunnel, live rate/total in the ongoing notification, and a
+  one-tap reconnect.
 - Real `VpnService` + TUN lifecycle; the descriptor is handed to Xray-core with
   `CoreController.startLoop(config, tunFd)`.
 - The UI only shows **Connected** after the TUN interface is up, the engine has started *and* a
@@ -55,6 +57,10 @@ the documents required to audit the build.
 - IPv6 on by default (no silent IPv6 leak), optional block-ads/trackers rule (`geosite:category-ads-all`).
 - Per-app VPN: all apps, allow-list or bypass-list, applied through `VpnService.Builder`.
 - MTU selection, log level.
+
+**Theme**
+- Five accent palettes and two surface styles (AMOLED pure black / Midnight charcoal), chosen in
+  Settings and stored with the rest of the preferences.
 
 **Diagnostics**
 - Session counters and rates read from the engine's outbound statistics once per second.

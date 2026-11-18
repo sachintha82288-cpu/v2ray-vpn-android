@@ -14,7 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.v2rayvpn.app.core.util.Formatters
@@ -32,6 +36,14 @@ fun StatisticsScreen(viewModel: AppViewModel, onBack: () -> Unit) {
     val traffic by viewModel.traffic.collectAsState()
     val state by viewModel.connectionState.collectAsState()
     val profiles by viewModel.profiles.collectAsState()
+
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(state) {
+        while (true) {
+            now = System.currentTimeMillis()
+            kotlinx.coroutines.delay(1000)
+        }
+    }
 
     val tested = profiles.filter { it.lastTestAt != null }.sortedBy { it.lastLatencyMs ?: Long.MAX_VALUE }
 
@@ -60,7 +72,7 @@ fun StatisticsScreen(viewModel: AppViewModel, onBack: () -> Unit) {
                         Spacer(Modifier.height(10.dp))
                         val connected = state as? ConnectionState.Connected
                         if (connected != null) {
-                            StatLine("Duration", Formatters.duration(System.currentTimeMillis() - connected.since))
+                            StatLine("Duration", Formatters.duration(now - connected.since))
                             StatLine("Downloaded", Formatters.bytes(traffic.downloadBytes))
                             StatLine("Uploaded", Formatters.bytes(traffic.uploadBytes))
                             StatLine("Download rate", Formatters.rate(traffic.downloadRate))

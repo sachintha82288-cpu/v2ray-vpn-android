@@ -19,6 +19,7 @@ import com.v2rayvpn.app.ui.AppRoot
 import com.v2rayvpn.app.ui.AppViewModel
 import com.v2rayvpn.app.ui.screens.OnboardingScreen
 import com.v2rayvpn.app.ui.theme.V2RayVpnTheme
+import com.v2rayvpn.app.ui.theme.VpnColors
 
 class MainActivity : ComponentActivity() {
 
@@ -29,6 +30,11 @@ class MainActivity : ComponentActivity() {
             V2RayVpnTheme {
                 val viewModel: AppViewModel = viewModel()
                 val settings by viewModel.settings.collectAsState()
+
+                LaunchedEffect(settings.themeAccent, settings.surfaceStyle) {
+                    VpnColors.accentChoice = settings.themeAccent
+                    VpnColors.surfaceChoice = settings.surfaceStyle
+                }
 
                 val notificationPermission = rememberLauncherForActivityResult(
                     ActivityResultContracts.RequestPermission()

@@ -5,31 +5,69 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import com.v2rayvpn.app.domain.model.SurfaceStyle
+import com.v2rayvpn.app.domain.model.ThemeAccent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-/** Pure AMOLED palette with restrained neon accents. */
+/**
+ * Palette with a user-selectable accent and surface style.
+ *
+ * The values are backed by Compose state, so reading `VpnColors.Purple` inside a composable both
+ * returns the current accent and subscribes the caller to accent changes. That keeps the twelve
+ * screens free of palette plumbing while still letting the theme switch at runtime.
+ */
 object VpnColors {
-    val Black = Color(0xFF000000)
-    val Surface = Color(0xFF08080C)
-    val SurfaceElevated = Color(0xFF101016)
-    val SurfaceSunken = Color(0xFF05050A)
-    val GlassTop = Color(0x1FFFFFFF)
-    val GlassBottom = Color(0x08FFFFFF)
-    val GlassBorder = Color(0x2BFFFFFF)
-    val Purple = Color(0xFFA855F7)
-    val PurpleDeep = Color(0xFF7C3AED)
-    val Blue = Color(0xFF3B82F6)
-    val Cyan = Color(0xFF22D3EE)
-    val Green = Color(0xFF22C55E)
-    val Amber = Color(0xFFF59E0B)
-    val Red = Color(0xFFEF4444)
-    val TextPrimary = Color(0xFFF4F4F7)
-    val TextSecondary = Color(0xFF9AA0AE)
-    val TextTertiary = Color(0xFF6B7280)
+
+    var accentChoice: ThemeAccent by mutableStateOf(ThemeAccent.VIOLET)
+    var surfaceChoice: SurfaceStyle by mutableStateOf(SurfaceStyle.AMOLED)
+
+    private fun accentColor(value: Long): Color = Color(value)
+
+    val Purple: Color get() = accentColor(accentChoice.primary)
+    val PurpleDeep: Color get() = accentColor(accentChoice.deep)
+    val Blue: Color get() = accentColor(accentChoice.secondary)
+    val Cyan: Color get() = accentColor(accentChoice.secondary)
+
+    val Black: Color
+        get() = when (surfaceChoice) {
+            SurfaceStyle.AMOLED -> Color(0xFF000000)
+            SurfaceStyle.MIDNIGHT -> Color(0xFF0B0B14)
+        }
+
+    val Surface: Color
+        get() = when (surfaceChoice) {
+            SurfaceStyle.AMOLED -> Color(0xFF08080C)
+            SurfaceStyle.MIDNIGHT -> Color(0xFF12121C)
+        }
+
+    val SurfaceElevated: Color
+        get() = when (surfaceChoice) {
+            SurfaceStyle.AMOLED -> Color(0xFF101016)
+            SurfaceStyle.MIDNIGHT -> Color(0xFF1A1A26)
+        }
+
+    val SurfaceSunken: Color
+        get() = when (surfaceChoice) {
+            SurfaceStyle.AMOLED -> Color(0xFF05050A)
+            SurfaceStyle.MIDNIGHT -> Color(0xFF0E0E16)
+        }
+
+    val GlassTop: Color = Color(0x1FFFFFFF)
+    val GlassBottom: Color = Color(0x08FFFFFF)
+    val GlassBorder: Color = Color(0x2BFFFFFF)
+    val Green: Color = Color(0xFF22C55E)
+    val Amber: Color = Color(0xFFF59E0B)
+    val Red: Color = Color(0xFFEF4444)
+    val TextPrimary: Color = Color(0xFFF4F4F7)
+    val TextSecondary: Color = Color(0xFF9AA0AE)
+    val TextTertiary: Color = Color(0xFF6B7280)
 }
 
 private val AppTypography = Typography(
@@ -87,7 +125,7 @@ private val AppTypography = Typography(
     )
 )
 
-private val AppColorScheme = darkColorScheme(
+private fun appColorScheme() = darkColorScheme(
     primary = VpnColors.Purple,
     onPrimary = Color.White,
     primaryContainer = VpnColors.PurpleDeep,
@@ -109,11 +147,11 @@ private val AppColorScheme = darkColorScheme(
 
 @Composable
 fun V2RayVpnTheme(content: @Composable () -> Unit) {
-    // The app is dark-only by design: pure black is the product's identity, not a preference.
+    // Dark-only by design: the surface style and accent are the user's choices, not light/dark.
     @Suppress("UNUSED_EXPRESSION")
     isSystemInDarkTheme()
     MaterialTheme(
-        colorScheme = AppColorScheme,
+        colorScheme = appColorScheme(),
         typography = AppTypography,
         content = content
     )

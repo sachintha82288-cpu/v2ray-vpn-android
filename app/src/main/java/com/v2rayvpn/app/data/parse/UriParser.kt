@@ -137,6 +137,10 @@ object UriParser {
         val host = obj.optString("host", "")
         val path = obj.optString("path", "")
         val sni = obj.optString("sni", "").ifBlank { obj.optString("peer", "") }
+        val headerType = obj.optString("type", "none")
+        if (headerType.isNotBlank() && headerType != "none" && net == "tcp") {
+            throw ConfigParseException("VMess TCP header obfuscation (\"type\": $headerType) is not supported")
+        }
         val transport = transportFrom(net)
         return Profile(
             name = obj.optString("ps", "").ifBlank { "$add:$port" },

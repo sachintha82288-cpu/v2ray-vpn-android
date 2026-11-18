@@ -1,6 +1,6 @@
-# Test report — V2RAY VPN 1.0.0 (versionCode 1)
+# Test report — V2RAY VPN 1.1.0 (versionCode 2)
 
-Date: 2026-11-12
+Date: 2026-11-18
 Build: `assembleDebug`, `assembleRelease`, `testDebugUnitTest` on JDK 17.0.12, Gradle 8.7,
 AGP 8.5.2, Kotlin 2.0.21, compileSdk 34, minSdk 26.
 
@@ -11,15 +11,16 @@ could not be executed in the build environment · **FAIL** = executed and failed
 
 ## 1. Automated tests — PASS
 
-`./gradlew :app:testDebugUnitTest` → **43 tests, 0 failures, 0 skipped** (JVM, `app/build/test-results/testDebugUnitTest/*.xml`).
+`./gradlew :app:testDebugUnitTest` → **47 tests, 0 failures, 0 skipped** (JVM, `app/build/test-results/testDebugUnitTest/*.xml`).
 
 | Suite | Tests | Covers |
 |---|---|---|
-| `UriParserTest` | 14 | VLESS (WS/TLS, REALITY), VMess base64, Trojan, Shadowsocks (SIP002 + legacy), SOCKS auth, IPv6 literal; rejects invalid UUID, out-of-range port, REALITY without `pbk`, SS plugins, unsupported cipher |
+| `UriParserTest` | 15 | VLESS (WS/TLS, REALITY), VMess base64, Trojan, Shadowsocks (SIP002 + legacy), SOCKS auth, IPv6 literal; rejects invalid UUID, out-of-range port, REALITY without `pbk`, SS plugins, unsupported cipher, VMess TCP header obfuscation |
 | `XrayConfigBuilderTest` | 7 | TUN inbound contract, VLESS user mapping, stats/policy enabled, DNS-outbound + hijack rule only in Xray-DNS mode, bypass-LAN rule presence, Shadowsocks method/password, no local proxy port opened |
 | `SubscriptionParserTest` | 9 | base64 list, plain list, JSON array, de-duplication, partial-parse skipping, empty/garbage bodies rejected, `subscription-userinfo` parsing (and absence) |
 | `XrayJsonImportTest` | 5 | VMess JSON import (transport/security/TLS fields), rejects balancers, unsupported protocol, malformed JSON, oversized input |
 | `ShareUriBuilderTest` | 3 | VLESS (REALITY/gRPC) and Shadowsocks round-trip, export scheme |
+| `SettingsStoreTest` | 3 | Settings/theme round-trip, unknown theme values fall back to defaults, MTU clamping |
 | `RedactorTest` | 5 | UUIDs, share links, key/value secrets, bearer tokens removed; byte/duration/latency formatting |
 
 First run had 1 failure (`RedactorTest.removesUuids`) caused by redaction ordering: the
@@ -35,6 +36,7 @@ pairs first and using the marker `[uuid]`; suite re-run green.
 | Release signing | PASS | `apksigner verify --print-certs` → `CN=V2RAY VPN, OU=Android, O=V2RAY VPN, L=Colombo, C=LK`, SHA-256 `c0f22619…b626312e` on all 5 APKs |
 | ABI contents | PASS | `unzip -l` shows exactly one `lib/<abi>/libgojni.so` per split; universal APK contains all four |
 | Manifest | PASS | `aapt2 dump badging`: `com.v2rayvpn.app`, versionCode 1 / 1.0.0, minSdk 26, targetSdk 34, launcher `MainActivity` |
+| Quick Settings tile declared | PASS | manifest contains `VpnTileService` with `BIND_QUICK_SETTINGS_TILE` and the `QS_TILE` intent filter |
 | VPN service declared | PASS | manifest tree: `V2RayVpnService`, `android:permission="android.permission.BIND_VPN_SERVICE"`, `exported=false`, intent-filter `android.net.VpnService` |
 | Permission set | PASS | INTERNET, ACCESS_NETWORK_STATE, FOREGROUND_SERVICE, FOREGROUND_SERVICE_SPECIAL_USE, POST_NOTIFICATIONS, QUERY_ALL_PACKAGES (per-app list only) — no camera, contacts, location, storage |
 | No analytics/ads SDKs | PASS | dependency list contains only AndroidX/Compose, Kotlin/coroutines, OkHttp, ZXing, libv2ray |

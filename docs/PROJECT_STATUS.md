@@ -1,4 +1,4 @@
-# Project status — V2RAY VPN 1.0.0
+# Project status — V2RAY VPN 1.1.0
 
 Legend: **Implemented** = code exists and is covered by unit tests or static verification ·
 **Partial** = implemented with a documented gap · **Blocked** = written but not executable in this
@@ -18,7 +18,7 @@ environment · **Not implemented** = deliberately out of scope for 1.0.0.
 | DNS settings | Implemented | Xray-DNS vs plain-DNS mode, remote/local resolver, IP validation |
 | Routing settings | Implemented | Global / bypass-LAN, ad-block rule, IPv6, MTU |
 | Split tunnelling | Implemented | All / allow-list / bypass-list with app picker |
-| General settings | Implemented | Reconnect, auto-refresh, log level, public-IP opt-in, reduced motion, export, delete all |
+| General settings | Implemented | Theme (5 accents, 2 surface styles), reconnect, auto-refresh, log level, public-IP opt-in, reduced motion, export, delete all |
 | About / privacy / licenses | Implemented | Versions, privacy statement, license list, limitations |
 
 ## Feature groups
@@ -51,6 +51,10 @@ environment · **Not implemented** = deliberately out of scope for 1.0.0.
 | Secret protection | Implemented | Keystore AES-GCM store, redacted logs, masked URLs |
 | Local data deletion | Implemented | Settings → Delete all local data |
 | Optional public IP lookup | Implemented | Off by default, discloses api.ipify.org |
+| Quick Settings tile | Implemented (runtime Blocked) | Toggles an authorised tunnel; opens the app when consent is missing |
+| Live traffic in the notification | Implemented (runtime Blocked) | Engine counters, 5 s refresh |
+| Theme system | Implemented | Accent palette + surface style, persisted |
+| Reconnect action | Implemented (runtime Blocked) | Tears down and restarts the tunnel |
 | Ads / analytics / accounts | Not implemented | By design |
 | Release APKs (4 ABI + universal), signed | Implemented | See `CHECKSUMS.txt` |
 | Universal + ABI-specific APKs | Implemented | `splits.abi` |

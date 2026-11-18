@@ -16,7 +16,6 @@ class V2RayApp : Application() {
     override fun onCreate() {
         super.onCreate()
         val container = AppContainer.init(this)
-        container.store.load()
         XrayEngine.ensureEnv(this)
         LogBus.i("Application started")
         appScope.launch {

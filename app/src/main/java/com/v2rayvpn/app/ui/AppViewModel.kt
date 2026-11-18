@@ -213,6 +213,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteProfile(profile: Profile) {
         viewModelScope.launch {
+            // Deleting the profile that is carrying the tunnel would leave it running with no owner.
+            if (VpnStateHolder.profileId.value == profile.id) {
+                VpnController.stop(getApplication())
+            }
             repository.deleteProfile(profile.id)
             postMessage("Deleted ${profile.name}")
         }
@@ -360,6 +364,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         VpnController.stop(getApplication())
     }
 
+    fun reconnect() {
+        VpnController.restart(getApplication())
+    }
+
     fun prepareVpnIntent(): Intent? = VpnController.prepareIntent(getApplication())
 
     // ------------------------------------------------------------------ settings
@@ -384,10 +392,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadInstalledApps(): List<InstalledApp> {
+    suspend fun loadInstalledApps(): List<InstalledApp> = withContext(Dispatchers.IO) {
         val pm = getApplication<Application>().packageManager
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        return pm.queryIntentActivities(intent, 0)
+        pm.queryIntentActivities(intent, 0)
             .map { InstalledApp(it.activityInfo.packageName, it.loadLabel(pm).toString()) }
             .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }

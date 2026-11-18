@@ -22,6 +22,8 @@ import android.content.Intent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.v2rayvpn.app.domain.model.SurfaceStyle
+import com.v2rayvpn.app.domain.model.ThemeAccent
 import com.v2rayvpn.app.ui.AppViewModel
 import com.v2rayvpn.app.ui.components.ConfirmDialog
 import com.v2rayvpn.app.ui.components.GlassCard
@@ -53,6 +55,44 @@ fun SettingsScreen(viewModel: AppViewModel, onBack: () -> Unit, onNavigate: (Str
             ScreenHeader(title = "Settings", subtitle = "Everything is stored on this device", onBack = onBack)
             Spacer(Modifier.height(14.dp))
 
+            SectionTitle("Theme")
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Accent",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = VpnColors.TextPrimary
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ThemeAccent.entries.forEach { accent ->
+                        OptionChip(accent.label, settings.themeAccent == accent) {
+                            viewModel.updateSettings { it.copy(themeAccent = accent) }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    text = "Surfaces",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = VpnColors.TextPrimary
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SurfaceStyle.entries.forEach { style ->
+                        OptionChip(style.label, settings.surfaceStyle == style) {
+                            viewModel.updateSettings { it.copy(surfaceStyle = style) }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = "The app is dark-only: pure black is the identity. Midnight lifts the surfaces slightly for bright rooms.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = VpnColors.TextSecondary
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
             SectionTitle("Network")
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 SettingRow(title = "Routing", description = "Global or bypass local network", value = settings.routingMode.name, onClick = { onNavigate("routing") })

@@ -10,6 +10,8 @@ import com.v2rayvpn.app.domain.model.Protocol
 import com.v2rayvpn.app.domain.model.RoutingMode
 import com.v2rayvpn.app.domain.model.SecurityType
 import com.v2rayvpn.app.domain.model.Subscription
+import com.v2rayvpn.app.domain.model.SurfaceStyle
+import com.v2rayvpn.app.domain.model.ThemeAccent
 import com.v2rayvpn.app.domain.model.Transport
 import java.io.File
 import kotlinx.coroutines.sync.Mutex
@@ -201,6 +203,8 @@ internal fun subscriptionFromJson(o: JSONObject): Subscription = Subscription(
 
 internal fun AppSettings.toJson(): JSONObject = JSONObject().apply {
     put("onboardingDone", onboardingDone)
+    put("themeAccent", themeAccent.name)
+    put("surfaceStyle", surfaceStyle.name)
     putOpt("selectedProfileId", selectedProfileId)
     put("routingMode", routingMode.name)
     put("blockAdsAndTrackers", blockAdsAndTrackers)
@@ -222,6 +226,10 @@ internal fun AppSettings.toJson(): JSONObject = JSONObject().apply {
 
 internal fun settingsFromJson(o: JSONObject): AppSettings = AppSettings(
     onboardingDone = o.optBoolean("onboardingDone", false),
+    themeAccent = runCatching { ThemeAccent.valueOf(o.optString("themeAccent")) }
+        .getOrDefault(ThemeAccent.VIOLET),
+    surfaceStyle = runCatching { SurfaceStyle.valueOf(o.optString("surfaceStyle")) }
+        .getOrDefault(SurfaceStyle.AMOLED),
     selectedProfileId = o.optString("selectedProfileId").takeIf { it.isNotBlank() },
     routingMode = runCatching { RoutingMode.valueOf(o.optString("routingMode")) }
         .getOrDefault(RoutingMode.BYPASS_LAN),
