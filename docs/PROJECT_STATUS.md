@@ -21,6 +21,8 @@ environment · **Not implemented** = deliberately out of scope for 1.0.0.
 | General settings | Implemented | Theme (5 accents, 2 surface styles), reconnect, auto-refresh, log level, public-IP opt-in, reduced motion, export, delete all |
 | About / privacy / licenses | Implemented | Versions, privacy statement, license list, limitations |
 
+Daily work is tracked in `docs/BACKLOG.md`.
+
 ## Feature groups
 
 | Area | Status | Notes |
